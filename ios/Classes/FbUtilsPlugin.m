@@ -2,6 +2,9 @@
 #import <CommonCrypto/CommonDigest.h>
 
 @implementation FbUtilsPlugin
+
+static NSInteger fbPasteboardchangeCount = -1;
+
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"fb_utils"
@@ -20,6 +23,9 @@
    }else if ([@"hideKeyboard" isEqualToString:call.method]) {
        [self hideKeyboard];
        result(@"true");
+   }else if([@"fbGetPasteboardText" isEqualToString:call.method]){
+       bool forceRead =  [call.arguments[@"forceRead"] isEqual:@"force"];
+       [self getPasteboardText:result forceRead:forceRead];
    } else {
     result(FlutterMethodNotImplemented);
   }
@@ -89,5 +95,63 @@
 
 -(void)hideKeyboard{
     [[self topViewController].view endEditing:YES];
+}
+
+-(void)getPasteboardText:(FlutterResult)result forceRead:(bool)forceRead{
+    UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+    if(@available(iOS 14.0, *)) {
+        if(!pasteboard.hasStrings){
+            result(nil);
+            return;
+        }
+    }
+    if(forceRead){
+        NSString *string = [pasteboard.string copy];
+        result(string);
+        return;
+    }
+        
+    //iOS14及以上，先检测剪切板内容，符合规则再读取剪切板
+     if (@available(iOS 14.0, *)) {
+//         UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+//         NSSet *pasteDetectionPatternSet = [NSSet setWithObjects:UIPasteboardDetectionPatternNumber,
+//                                            UIPasteboardDetectionPatternProbableWebURL,
+//                                            UIPasteboardDetectionPatternProbableWebSearch,
+//                                            nil];
+//         [pasteboard detectPatternsForPatterns: pasteDetectionPatternSet
+//                             completionHandler:^(NSSet<UIPasteboardDetectionPattern> *foundPattenSet, NSError *e) {
+//             BOOL isNumber = NO, isUrl = NO, isWebSearch = NO;
+//             for (UIPasteboardDetectionPattern pattern in foundPattenSet) {
+//                 if ([pattern isEqualToString: UIPasteboardDetectionPatternNumber]) {
+//                     isNumber = YES;
+//                 }
+//                 if ([pattern isEqualToString: UIPasteboardDetectionPatternProbableWebURL]) {
+//                     isUrl = YES;
+//                 }
+//                 if ([pattern isEqualToString: UIPasteboardDetectionPatternProbableWebSearch]) {
+//                     isWebSearch = YES;
+//                 }
+//             }
+//             if (isNumber && isUrl) {
+//                 //符合规则，在下一个runloop读取剪切板
+//                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^() {
+//                     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+//                     NSString *string = [pasteboard.string copy];
+//                     NSLog(@"pasteboard:%@",string);
+//                 });
+//             }
+//         }];
+         if(pasteboard.changeCount == fbPasteboardchangeCount){
+             result(nil);
+         }else{
+             fbPasteboardchangeCount = pasteboard.changeCount;
+             NSString *string = [pasteboard.string copy];
+             result(string);
+         }
+     } else {
+         //iOS14以下，直接读剪切板
+         NSString *string = [pasteboard.string copy];
+         result(string);
+     }
 }
 @end

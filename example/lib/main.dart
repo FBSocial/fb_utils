@@ -13,10 +13,31 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      readClipContent(false);
+    } else if (state == AppLifecycleState.paused) {
+    } else if (state == AppLifecycleState.inactive) {}
+    super.didChangeAppLifecycleState(state);
+  }
+
+  void readClipContent(bool forceRead) async {
+    final text = await FbUtils.getPasteboardText(forceRead: forceRead);
+    debugPrint("粘贴板内容:$text");
   }
 
   @override
@@ -40,6 +61,12 @@ class _MyAppState extends State<MyApp> {
                   FbUtils.hideKeyboard();
                 },
                 child: Text('hide keyboard'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  readClipContent(true);
+                },
+                child: Text('读取粘贴板'),
               ),
             ],
           )),
