@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "fb_utils",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}

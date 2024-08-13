@@ -11,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  crypto: ^3.0.1
+  convert: ^3.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -31,6 +32,9 @@ flutter:
         package: com.example.fb_utils
         pluginClass: FbUtilsPlugin
       ios:
+        pluginClass: FbUtilsPlugin
+      ohos:
+        package: com.example.fb_utils
         pluginClass: FbUtilsPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

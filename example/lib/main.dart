@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:fb_utils/fb_utils.dart';
 
 void main() {
@@ -52,7 +49,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               Text('fb utils'),
               ElevatedButton(
                 onPressed: () {
-                  FbUtils.getMD5WithSring("fb");
+                  FbUtils.getMD5WithSring("fb").then((value) => print(value));
                 },
                 child: Text('md5 string'),
               ),
